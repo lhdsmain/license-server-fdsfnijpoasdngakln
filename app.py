@@ -9,7 +9,7 @@ app = Flask(__name__)
 SECRET = os.environ.get("SECRET", "X9@kLm!123")
 
 # 👉 你的 GitHub raw 地址（必须改成你自己的）
-GITHUB_URL = "https://github.com/lhdsmain/license-server-fdsfnijpoasdngakln/blob/main/devices.json"
+GITHUB_URL = "https://raw.githubusercontent.com/lhdsmain/license-server-fdsfnijpoasdngakln/refs/heads/main/devices.json"
 
 # 👉 缓存（避免频繁请求 GitHub）
 devices_cache = set()
