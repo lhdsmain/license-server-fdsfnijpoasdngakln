@@ -1,37 +1,47 @@
 from flask import Flask, request, jsonify
 import hashlib
 import os
+import json
 
 app = Flask(__name__)
 
-# 建议在 Render 里设置环境变量 SECRET
 SECRET = os.environ.get("SECRET", "X9@kLm!123")
 
+# 👉 白名单文件
+DB_FILE = "devices.json"
 
-# 首页（用于测试服务是否正常）
+
+def load_devices():
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+
+
+devices = load_devices()
+
+
 @app.route('/')
 def home():
     return "server running"
 
 
-# 授权接口
-@app.route('/license', methods=['GET', 'POST'])
+@app.route('/license', methods=['POST'])
 def license_api():
-    # 👉 浏览器访问用（方便排查）
-    if request.method == 'GET':
-        return "license endpoint: use POST"
-
-    # 👉 正式逻辑
     data = request.json
-    if not data or "device_id" not in data:
-        return jsonify({
-            "status": "error",
-            "msg": "device_id missing"
-        }), 400
-
     device_id = data.get("device_id", "")
 
-    # 生成 hash（授权核心）
+    if not device_id:
+        return jsonify({"status": "error"}), 400
+
+    # ❗ 关键：必须在白名单
+    if device_id not in devices:
+        return jsonify({
+            "status": "denied",
+            "msg": "device not registered"
+        }), 403
+
+    # ✔ 合法设备 → 返回授权
     payload = device_id + SECRET
     hash_val = hashlib.md5(payload.encode()).hexdigest()
 
@@ -41,7 +51,6 @@ def license_api():
     })
 
 
-# Render 需要绑定这个端口
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
