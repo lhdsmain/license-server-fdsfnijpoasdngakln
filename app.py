@@ -25,7 +25,7 @@ def load_devices():
         return devices_cache
 
     try:
-        resp = requests.get(GITHUB_URL, timeout=5)
+        resp = requests.get(GITHUB_URL, timeout=60)
         data = resp.json()
         devices_cache = set(data)
         last_update = time.time()
