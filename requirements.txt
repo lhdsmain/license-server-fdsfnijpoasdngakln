@@ -1,7 +1,5 @@
 flask
 gunicorn
-hashlib
-json
 requests
 
 
